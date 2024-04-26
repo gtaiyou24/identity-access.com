@@ -1,4 +1,4 @@
-# console.epic-bot.com
+# identity-access.com
 ユーザー認証/認可を行う Web アプリのテンプレートプロジェクト。
 バックエンドのユーザー認証/認可 API として [gtaiyou24/identity-access](https://github.com/gtaiyou24/identity-access) を利用します。
 
