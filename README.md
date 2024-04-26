@@ -4,6 +4,8 @@
 
 ```bash
 git clone https://github.com/gtaiyou24/identity-access.com.git [プロジェクト名]
+
+sed -i '' 's/identity-access.com/[プロジェクト名]/g' package.json
 ```
 
 参考文献:
