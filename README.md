@@ -1,6 +1,5 @@
 # identity-access.com
 ユーザー認証/認可を行う Web アプリのテンプレートプロジェクト。
-バックエンドのユーザー認証/認可 API として [gtaiyou24/identity-access](https://github.com/gtaiyou24/identity-access) を利用します。
 
 ```bash
 git clone https://github.com/gtaiyou24/identity-access.com.git [プロジェクト名]
@@ -21,16 +20,8 @@ sed -i '' 's/identity-access.com/[プロジェクト名]/g' package.json
 
 ## How To
 ### 🏃Getting Started
-本プロジェクトは、ユーザー認証/認可 API として [gtaiyou24/identity-access](https://github.com/gtaiyou24/identity-access) を利用します。
+本プロジェクトは、ユーザー認証/認可 API として [gtaiyou24/clean-architecture](https://github.com/gtaiyou24/clean-architecture) を利用します。
 そのため、事前に clone して起動してください。
-
-```bash
-cd ~/path/to/other
-git clone https://github.com/gtaiyou24/identity-access.git
-cd identity-access
-
-docker-compose up --build
-```
 
 次に本プロジェクトを起動してください。
 ```bash
