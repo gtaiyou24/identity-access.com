@@ -89,7 +89,10 @@ export default {
             // ログイン / 未ログイン時の画面遷移を制御する
 
             const { nextUrl } = request;
-            const isLoggedIn = !!auth;
+            const isLoggedIn = (
+                !!auth &&
+                (new Date(Number(auth?.user.expiresAt) * 1000)) >= new Date()
+            );
 
             const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
             const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
