@@ -7,14 +7,19 @@ import {ExtendedUser} from "@/next-auth";
 import {TokenSet} from "@auth/core/types";
 
 const refreshToken = async (refreshToken: string): Promise<TokenSet> => {
-    const json = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/token`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/token`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `bearer ${refreshToken}`
         }
-    }).then((res) => res.json());
+    });
 
+    if (!response.ok) {
+        throw new Error("Failed to refresh token");
+    }
+
+    const json = await response.json();
     return json as TokenSet;
 }
 
@@ -89,10 +94,7 @@ export default {
             // ログイン / 未ログイン時の画面遷移を制御する
 
             const { nextUrl } = request;
-            const isLoggedIn = (
-                !!auth &&
-                (new Date(Number(auth?.user.expiresAt) * 1000)) >= new Date()
-            );
+            const isLoggedIn = !!auth;
 
             const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
             const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
@@ -113,32 +115,38 @@ export default {
                 return true;
             }
 
-            return !(!isLoggedIn && !isPublicRoute);
+            return isPublicRoute || isLoggedIn;
         },
-        async jwt({ token, user}) {
-            // 未ログインの場合
-            if (!token.accessToken) return { ...token, ...user };
-
-            // ログイン済みの場合
-            // see https://authjs.dev/guides/refresh-token-rotation
-            const expiresAt = new Date(Number(token.expiresAt) * 1000);
-            const notExpired = expiresAt >= new Date();
-            if (notExpired) {
-                // トークン有効期間が切れていない場合は、そのまま返す
+        async jwt({ token, user, account}) {
+            if (user) {
+                token.accessToken = user.accessToken;
+                token.refreshToken = user.refreshToken;
+                token.expiresAt = user.expiresAt;
                 return token;
             }
-            // トークン有効期間が切れている場合は、リフレッシュトークン指定でトークンを更新する
-            const tokens: TokenSet = await refreshToken(token.refreshToken as string);
-            return {
-                ...token,
-                ...user,
-                accessToken: tokens.access_token,
-                refreshToken: tokens.refresh_token,
-                expiresAt: tokens.expires_at
-            };
+
+            const currentTime = Math.floor(Date.now() / 1000);
+            if (token.expiresAt && currentTime >= token.expiresAt) {
+                try {
+                    const tokenSet: TokenSet = await refreshToken(token.refreshToken as string);
+                    token.accessToken = tokenSet.access_token;
+                    token.refreshToken = tokenSet.refresh_token;
+                    token.expiresAt = tokenSet.expires_at;
+                    console.log("Token refreshed successfully");
+                } catch (error) {
+                    console.error("Failed to refresh token:", error);
+                    throw new Error("Failed to refresh token");
+                }
+            }
+
+            return token;
         },
         async session({ session, token }) {
-            session.user = token as any;
+            if (token?.accessToken) {
+                session.accessToken = token.accessToken;
+                session.refreshToken = token.refreshToken;
+                session.expiresAt = token.expiresAt;
+            }
             return session;
         },
     }
