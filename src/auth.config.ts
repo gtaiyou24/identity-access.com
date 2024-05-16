@@ -124,30 +124,10 @@ export default {
                 token.expiresAt = user.expiresAt;
                 return token;
             }
-
-            const currentTime = Math.floor(Date.now() / 1000);
-            if (token.expiresAt && currentTime >= token.expiresAt) {
-                try {
-                    const tokenSet: TokenSet = await refreshToken(token.refreshToken as string);
-                    token.accessToken = tokenSet.access_token;
-                    token.refreshToken = tokenSet.refresh_token;
-                    token.expiresAt = tokenSet.expires_at;
-                    console.log("Token refreshed successfully");
-                } catch (error) {
-                    console.error("Failed to refresh token:", error);
-                    throw new Error("Failed to refresh token");
-                }
-            }
-
             return token;
         },
         async session({ session, token }) {
-            if (token?.accessToken) {
-                session.accessToken = token.accessToken;
-                session.refreshToken = token.refreshToken;
-                session.expiresAt = token.expiresAt;
-            }
-            return session;
+            return {...session, ...token};
         },
     }
 } satisfies NextAuthConfig;
