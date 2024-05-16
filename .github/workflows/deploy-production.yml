@@ -1,0 +1,54 @@
+name: "🚀 Deploy: Production"
+run-name: 📌  <${{ inputs.deploy_to }}> 本番環境へ ${{ github.ref_name }} をデプロイ 🚀
+
+on:
+  # 手動トリガー
+  workflow_dispatch:
+    inputs:
+      deploy_to:
+        type: choice
+        description: Deploy to
+        default: cloud-run
+        options:
+          - cloud-run
+          - lambda
+      approval:
+        description: 'type deploy/production'
+        required: true
+
+# 本番リリースワークフローを同時に実行できないようにコンカレンシーを使用
+concurrency: ${{ github.workflow }}
+
+jobs:
+  check-input:
+    runs-on: ubuntu-latest
+    name: '👀 リリースチェック'
+    steps:
+      - if: ${{ github.event.inputs.approval != 'deploy/production' }}
+        run: echo '::error ::`approval` に `deploy/production` と入力してください'; exit 1
+      - if: ${{ github.ref_name != 'main' }}
+        run: echo '::error ::`branch` は `main` を指定してください'; exit 1
+
+  deploy-cloud-run:
+    if: ${{ github.event.inputs.deploy_to == 'cloud-run' }}
+    needs: build
+    name: '🚀 デプロイ'
+    uses: ./.github/workflows/_deploy-to-cloud-run.yml
+    with:
+      project-id: ${{ vars.GCP_PROJECT_ID }}
+      workload-identity-provider: ${{ vars.GCP_WIF_PROVIDER }}
+      service-account: ${{ vars.GCP_WIF_SERVICE_ACCOUNT }}
+      registry: 'identity-access.com'
+      cloud-run-name: 'identity-access.com'
+      cloud-run-service-account: ${{ vars.GCP_CLOUD_RUN_SERVICE_ACCOUNT }}
+      region: 'asia-northeast1'
+      cleanup-images: true
+
+
+  deploy-lambda:
+    if: ${{ github.event.inputs.deploy_to == 'lambda' }}
+    needs: build
+    name: '🚀 デプロイ'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Not Implement"
