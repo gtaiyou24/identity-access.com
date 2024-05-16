@@ -81,7 +81,8 @@ export function updateCookie(
 
 export async function middleware(req: NextRequest) {
     const { nextUrl } = req;
-    const token = await getToken({ req: req, secret: process.env.AUTH_SECRET });
+    // @ts-ignore
+    const token = await getToken({req: req, secret: process.env.AUTH_SECRET! });
     const isLoggedIn = token !== null;
 
     let response = NextResponse.next();
