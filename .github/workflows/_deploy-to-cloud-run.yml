@@ -12,7 +12,7 @@ on:
         type: string
         required: true
       service-account:
-        description: 'サービスアカウント'
+        description: 'GitHub Action のサービスアカウント'
         type: string
         required: true
       registry:

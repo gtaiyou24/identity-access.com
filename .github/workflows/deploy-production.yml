@@ -31,7 +31,7 @@ jobs:
 
   deploy-cloud-run:
     if: ${{ github.event.inputs.deploy_to == 'cloud-run' }}
-    needs: build
+    needs: check-input
     name: '🚀 デプロイ'
     uses: ./.github/workflows/_deploy-to-cloud-run.yml
     with:
@@ -47,7 +47,7 @@ jobs:
 
   deploy-lambda:
     if: ${{ github.event.inputs.deploy_to == 'lambda' }}
-    needs: build
+    needs: check-input
     name: '🚀 デプロイ'
     runs-on: ubuntu-latest
     steps:
