@@ -12,7 +12,13 @@ const font = Poppins({
 });
 
 export default async function Home() {
-  const session = await auth();
+    const session = await auth();
+    const me = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/me`, {
+       headers: {
+           "Content-Type": "application/json",
+           "Authorization": `bearer ${session?.accessToken}`
+       }
+    }).then((response) => response.json());
     return (
         <ScrollArea className="h-full">
             <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -140,8 +146,10 @@ export default async function Home() {
                                 <CardHeader>
                                     <CardTitle>Overview</CardTitle>
                                 </CardHeader>
-                                <CardContent className="pl-2">
-                                    fafa
+                                <CardContent className="pl-2 px-6">
+                                    <pre className="py-6 px-4 whitespace-pre-wrap break-all">
+                                        {JSON.stringify(session, null, 2)}
+                                    </pre>
                                 </CardContent>
                             </Card>
                             <Card className="col-span-4 md:col-span-3">
@@ -152,7 +160,9 @@ export default async function Home() {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    fafa
+                                    <pre className="py-6 px-4 whitespace-pre-wrap break-all">
+                                        {JSON.stringify(me, null, 2)}
+                                    </pre>
                                 </CardContent>
                             </Card>
                         </div>

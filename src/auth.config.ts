@@ -6,18 +6,6 @@ import {apiAuthPrefix, authRoutes, DEFAULT_LOGIN_REDIRECT, publicRoutes} from "@
 import {ExtendedUser} from "@/next-auth";
 import {TokenSet} from "@auth/core/types";
 
-const refreshToken = async (refreshToken: string): Promise<TokenSet> => {
-    const json = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/token`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `bearer ${refreshToken}`
-        }
-    }).then((res) => res.json());
-
-    return json as TokenSet;
-}
-
 export default {
     providers: [
         Google({
@@ -110,33 +98,19 @@ export default {
                 return true;
             }
 
-            return !(!isLoggedIn && !isPublicRoute);
+            return isPublicRoute || isLoggedIn;
         },
-        async jwt({ token, user}) {
-            // 未ログインの場合
-            if (!token.accessToken) return { ...token, ...user };
-
-            // ログイン済みの場合
-            // see https://authjs.dev/guides/refresh-token-rotation
-            const expiresAt = new Date(Number(token.expiresAt) * 1000);
-            const notExpired = expiresAt >= new Date();
-            if (notExpired) {
-                // トークン有効期間が切れていない場合は、そのまま返す
+        async jwt({ token, user, account}) {
+            if (user) {
+                token.accessToken = user.accessToken;
+                token.refreshToken = user.refreshToken;
+                token.expiresAt = user.expiresAt;
                 return token;
             }
-            // トークン有効期間が切れている場合は、リフレッシュトークン指定でトークンを更新する
-            const tokens: TokenSet = await refreshToken(token.refreshToken as string);
-            return {
-                ...token,
-                ...user,
-                accessToken: tokens.access_token,
-                refreshToken: tokens.refresh_token,
-                expiresAt: tokens.expires_at
-            };
+            return token;
         },
         async session({ session, token }) {
-            session.user = token as any;
-            return session;
+            return {...session, ...token};
         },
     }
 } satisfies NextAuthConfig;
