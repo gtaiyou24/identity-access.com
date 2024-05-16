@@ -38,7 +38,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
         })
         .catch((error) => {
             console.error(error);
-            return token;
+            throw error;
         })
         .finally(() => {
             isRefreshing = false;
@@ -71,8 +71,9 @@ export function updateCookie(
             sameSite: "lax"
         });
     } else {
-        request.cookies.delete(sessionCookieName);
-        return NextResponse.redirect(new URL("/auth/login", request.url));
+        const redirect = NextResponse.redirect(new URL("/auth/login", request.url));
+        redirect.cookies.delete(sessionCookieName);
+        return redirect;
     }
 
     return response;
