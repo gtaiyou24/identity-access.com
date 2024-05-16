@@ -6,23 +6,6 @@ import {apiAuthPrefix, authRoutes, DEFAULT_LOGIN_REDIRECT, publicRoutes} from "@
 import {ExtendedUser} from "@/next-auth";
 import {TokenSet} from "@auth/core/types";
 
-const refreshToken = async (refreshToken: string): Promise<TokenSet> => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/token`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `bearer ${refreshToken}`
-        }
-    });
-
-    if (!response.ok) {
-        throw new Error("Failed to refresh token");
-    }
-
-    const json = await response.json();
-    return json as TokenSet;
-}
-
 export default {
     providers: [
         Google({
