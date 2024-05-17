@@ -22,9 +22,9 @@ export function UserNav() {
                         <Avatar className="h-8 w-8">
                             <AvatarImage
                                 src={session.user?.image ?? ""}
-                                alt={session.user?.name ?? ""}
+                                alt={session.user?.email ?? ""}
                             />
-                            <AvatarFallback>{session.user?.name?.[0]}</AvatarFallback>
+                            <AvatarFallback>{session.user?.email?.[0]}</AvatarFallback>
                         </Avatar>
                     </Button>
                 </DropdownMenuTrigger>

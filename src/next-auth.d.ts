@@ -1,13 +1,4 @@
-import NextAuth, { type DefaultSession } from "next-auth";
 import "next-auth/jwt"
-
-// 独自のログインユーザーの型を定義
-export type ExtendedUser = DefaultSession['user'] & {
-  email: string;
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: number;
-};
 
 declare module "next-auth" {
     interface TokenSet {
@@ -22,7 +13,7 @@ declare module "next-auth" {
         expiresAt?: number;
     }
     interface User {
-        email?: string | null;
+        user: {email?: string | null};
         accessToken?: string;
         refreshToken?: string;
         expiresAt?: number;

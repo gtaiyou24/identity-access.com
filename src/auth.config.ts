@@ -1,9 +1,8 @@
-import type { NextAuthConfig } from "next-auth";
+import type {NextAuthConfig, User} from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import {apiAuthPrefix, authRoutes, DEFAULT_LOGIN_REDIRECT, publicRoutes} from "@/route";
-import {ExtendedUser} from "@/next-auth";
 import {TokenSet} from "@auth/core/types";
 
 export default {
@@ -30,11 +29,13 @@ export default {
             },
             profile(profile, tokens) {
                 return {
-                    email: profile.email,
+                    user: {
+                        email: profile.email,
+                    },
                     accessToken: tokens.access_token,
                     refreshToken: tokens.refresh_token,
                     expiresAt: tokens.expires_at
-                } as ExtendedUser;
+                } as User;
             }
         }),
         Credentials({
@@ -57,11 +58,13 @@ export default {
                 const tokens: TokenSet = await res.json();
                 if (tokens) {
                     return {
-                        email: credentials?.email,
+                        user: {
+                            email: credentials?.email
+                        },
                         accessToken: tokens.access_token,
                         refreshToken: tokens.refresh_token,
                         expiresAt: tokens.expires_at
-                    } as ExtendedUser;
+                    } as User;
                 }
                 return null;
             },
@@ -100,8 +103,11 @@ export default {
 
             return isPublicRoute || isLoggedIn;
         },
-        async jwt({ token, user, account}) {
+        async jwt({ token, user }) {
+            // 初回ログイン時のみ user が渡される
             if (user) {
+                // 初回ログイン時
+                token.user = user.user
                 token.accessToken = user.accessToken;
                 token.refreshToken = user.refreshToken;
                 token.expiresAt = user.expiresAt;
@@ -110,7 +116,15 @@ export default {
             return token;
         },
         async session({ session, token }) {
-            return {...session, ...token};
+            if (token?.accessToken) {
+                session.accessToken = token.accessToken;
+                session.refreshToken = token.refreshToken;
+                session.expiresAt = token.expiresAt;
+            }
+            if (token?.user) {
+                session.user = token.user as any;
+            }
+            return session;
         },
     }
 } satisfies NextAuthConfig;
