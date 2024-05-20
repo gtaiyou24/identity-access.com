@@ -2,9 +2,8 @@
 ユーザー認証/認可を行う Web アプリのテンプレートプロジェクト。
 
 ```bash
-git clone https://github.com/gtaiyou24/identity-access.com.git [プロジェクト名]
-
 sed -i '' 's/identity-access.com/[プロジェクト名]/g' package.json
+grep 'identity-access.com' -rl .* --exclude=README.md --exclude-dir={.idea,.git,bin} | xargs sed -i '' "s/identity-access.com/[プロジェクト名]/g"
 ```
 
 参考文献:
