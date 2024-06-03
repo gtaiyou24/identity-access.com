@@ -30,3 +30,18 @@ npm run dev
 ```
 
 [http://localhost:3000](http://localhost:3000) にアクセスして、挙動を確認してください。
+
+### 🛠️ Generate Typescript types from OpenAPI
+
+```bash
+npm i openapi-fetch
+npm i -D openapi-typescript typescript
+```
+
+```bash
+npx openapi-typescript http://localhost:8000/openapi.json -o ./src/types/cook-cart/index.ts
+```
+
+Appendix
+
+ - [openapi-typescript | OpenAPI TypeScript](https://openapi-ts.pages.dev/introduction)
